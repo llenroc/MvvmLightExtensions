@@ -5,7 +5,8 @@ This repository contains extension code for Mvvm Light library with Xamarin Form
 
 ### LightNavigationService - extended Navigation Service for Xamarin Forms and MVVM Light
 
-![](https://thumbs.gfycat.com/SpotlessScornfulAsp-size_restricted.gif)
+![](https://thumbs.gfycat.com/SpotlessScornfulAsp-size_restricted.gif) ![](https://thumbs.gfycat.com/MeagerUnderstatedBanteng-size_restricted.gif)
+
 
 LightNavigationService was created to handle navigation between different Xamarin Forms pages asynchronously.
 Please note that this is first early version so do not hestitate to fork and enhance.
