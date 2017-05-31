@@ -1,37 +1,161 @@
-## Welcome to GitHub Pages
+## Mvvm Light Extensions
 
-You can use the [editor on GitHub](https://github.com/Daniel-Krzyczkowski/MvvmLightExtensions/edit/master/README.md) to maintain and preview the content for your website in Markdown files.
+This repository contains extension code for Mvvm Light library with Xamarin Forms.
 
-Whenever you commit to this repository, GitHub Pages will run [Jekyll](https://jekyllrb.com/) to rebuild the pages in your site, from the content in your Markdown files.
 
-### Markdown
+### LightNavigationService - extended Navigation Service for Xamarin Forms and MVVM Light
 
-Markdown is a lightweight and easy-to-use syntax for styling your writing. It includes conventions for
+![](https://thumbs.gfycat.com/SpotlessScornfulAsp-size_restricted.gif)
 
-```markdown
-Syntax highlighted code block
+LightNavigationService was created to handle navigation between different Xamarin Forms pages asynchronously.
+Please note that this is first early version so do not hestitate to fork and enhance.
 
-# Header 1
-## Header 2
-### Header 3
+**INavigationService interface**
 
-- Bulleted
-- List
+    public interface INavigationService
+    {
+      Page RootPage { get; set; }
+      Page CurrentPage { get; set; }  
+      void Configure(string pageKey, Type pageType);
+      void InitializeRootPage(Page page);
+      Task GoBack();
+      Task NavigateTo(string pageKey);
+      Task NavigateTo(string pageKey, object parameter);
+    }
+    
+**INavigationService implementation (LightNavigationService)**
 
-1. Numbered
-2. List
+    public class LightNavigationService: INavigationService
+        {
+            private readonly ConcurrentDictionary<string, Type> _pagesByKey = new ConcurrentDictionary<string, Type>();
 
-**Bold** and _Italic_ and `Code` text
+            public Page RootPage { get; set; }
+            public Page CurrentPage { get; set; }
 
-[Link](url) and ![Image](src)
-```
+        public void Configure(string pageKey, Type pageType)
+        {
+            if (_pagesByKey.ContainsKey(pageKey))
+            {
+              _pagesByKey[pageKey] = pageType;
+            }
+            else
+            {
+              _pagesByKey.TryAdd(pageKey, pageType);
+            }
+        }
 
-For more details see [GitHub Flavored Markdown](https://guides.github.com/features/mastering-markdown/).
+        public async Task GoBack()
+        {
+          if (RootPage is NavigationPage)
+          {
+            var mainPage = RootPage as NavigationPage;
+            await mainPage.CurrentPage.Navigation.PopAsync();
+          }
 
-### Jekyll Themes
+          if (RootPage is CarouselPage)
+          {
+            await CurrentPage.Navigation.PopModalAsync(true);   
+          }
 
-Your Pages site will use the layout and styles from the Jekyll theme you have selected in your [repository settings](https://github.com/Daniel-Krzyczkowski/MvvmLightExtensions/settings). The name of this theme is saved in the Jekyll `_config.yml` configuration file.
+           if (RootPage is ContentPage)
+              {
+                if(RootPage.Navigation.ModalStack.Count>0)
+                  {
+                     CurrentPage = RootPage.Navigation.ModalStack.Last();
+                     await RootPage.Navigation.PopModalAsync(true);
+                    }      
+                }
+        }
 
-### Support or Contact
+        public void InitializeRootPage(Page page)
+        {
+          RootPage = page;
+          Application.Current.MainPage = page;
+        }
 
-Having trouble with Pages? Check out our [documentation](https://help.github.com/categories/github-pages-basics/) or [contact support](https://github.com/contact) and we’ll help you sort it out.
+        public async Task NavigateTo(string pageKey)
+        {
+          await NavigateTo(pageKey, null);
+        }
+
+        public async Task NavigateTo(string pageKey, object parameter)
+        {
+          if (_pagesByKey.ContainsKey(pageKey))
+          {
+            var type = _pagesByKey[pageKey];
+            ConstructorInfo constructor;
+            object[] parameters;
+
+            if (parameter == null)
+            {
+              constructor = type.GetTypeInfo()
+                .DeclaredConstructors
+                .FirstOrDefault(c => !c.GetParameters().Any());
+
+              parameters = new object[]
+              {
+              };
+            }
+            else
+            {
+              constructor = type.GetTypeInfo()
+                .DeclaredConstructors
+                .FirstOrDefault(
+                  c =>
+                  {
+                    var p = c.GetParameters();
+                    return p.Count() == 1 && p[0].ParameterType == parameter.GetType();
+                  });
+
+              parameters = new[]
+              {
+                  parameter
+                };
+            }
+
+            if (constructor == null)
+            {
+              throw new InvalidOperationException(
+                "No suitable constructor found for page " + pageKey);
+            }
+
+            var page = constructor.Invoke(parameters) as Page;
+
+                    await HandleNavigation(page);
+          }
+          else
+          {
+            throw new ArgumentException(
+              string.Format(
+                "No such page: {0}. Did you forget to call NavigationService.Configure?",
+                pageKey), nameof(pageKey));
+          }
+        }
+
+        private async Task HandleNavigation(Page pageToNavigate)
+         {
+            if (RootPage is NavigationPage)
+            {
+              var navigationPage = RootPage as NavigationPage;
+              await navigationPage.Navigation.PushAsync(pageToNavigate);
+            }
+
+            if (RootPage is CarouselPage)
+            {
+              var contentPage = RootPage as CarouselPage;
+              await contentPage.Navigation.PushModalAsync(pageToNavigate, true);
+            }
+
+            if (RootPage is ContentPage)
+            {
+              var contentPage = RootPage as ContentPage;
+                        if(CurrentPage is NavigationPage)
+                        await CurrentPage.Navigation.PushAsync(pageToNavigate, true);
+                    else
+                        await contentPage.Navigation.PushModalAsync(pageToNavigate, true);
+            }   
+               CurrentPage = pageToNavigate;
+           }
+        }
+
+Sample application is available in repository.
