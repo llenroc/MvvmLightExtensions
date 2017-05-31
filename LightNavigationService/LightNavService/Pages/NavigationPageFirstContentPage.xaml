@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    x:Class="LightNavService.Pages.NavigationPageFirstContentPage"
+    BindingContext="{Binding NavigationPageFirstContentPageViewModel, Source={StaticResource Locator}}"
+    Title = "Navigation page">
+
+     <StackLayout Orientation="Vertical" VerticalOptions="Center">
+             <Label Text="This is NavigationPage" HorizontalOptions="Center"/>
+              <Button Text="Show details" Command="{Binding ShowDetails}"/>
+             <Button Text="Back" Command="{Binding GoBack}"/>
+      </StackLayout>
+    
+</ContentPage>

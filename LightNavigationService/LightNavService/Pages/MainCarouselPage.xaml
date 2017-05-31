@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CarouselPage xmlns="http://xamarin.com/schemas/2014/forms"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    x:Class="LightNavService.Pages.MainCarouselPage"
+     BindingContext="{Binding MainCarouselPageViewModel, Source={StaticResource Locator}}">
+
+    <ContentPage x:Name="FirstPage">
+         <StackLayout Orientation="Vertical" VerticalOptions="Center">
+             <Label Text="This is first Contentpage inside CarouselPage" HorizontalOptions="Center"/>
+             <Button Text="Open NavigationPage" Command="{Binding NavigateToNavigationPage}"/>
+             <Button Text="Back" Command="{Binding GoBack}"/>
+        </StackLayout>
+	</ContentPage>
+
+    <ContentPage x:Name="SecondPage">
+         <StackLayout Orientation="Vertical" VerticalOptions="Center">
+             <Label Text="This is second Contentpage inside CarouselPage" HorizontalOptions="Center"/>
+             <Button Text="Open NavigationPage" Command="{Binding NavigateToNavigationPage}"/>
+             <Button Text="Back" Command="{Binding GoBack}"/>
+        </StackLayout>
+    </ContentPage>
+    
+</CarouselPage>
