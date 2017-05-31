@@ -158,4 +158,4 @@ Please note that this is first early version so do not hestitate to fork and enh
            }
         }
 
-Sample application is available in repository.
+Sample application is available in repository (dev branch).
